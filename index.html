@@ -14,35 +14,36 @@
             padding: 0;
             background-color: #f5f7fa;
             color: #333;
+            overflow-x: hidden;
         }
         .header {
             background-color: #1f497d;
             color: white;
             text-align: center;
-            padding: 12px 10px;
+            padding: 8px 10px; /* 🗜️ 縮小高度 */
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         .header h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px; /* 🗜️ 縮小字型 */
         }
         .container {
             max-width: 500px;
             margin: 0 auto;
-            padding: 10px;
+            padding: 8px; /* 🗜️ 縮小內距 */
         }
         .card {
             background: white;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 8px 10px; /* 🗜️ 縮小內距 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 8px; /* 🗜️ 縮小間距 */
         }
         .card-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             color: #1f497d;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 5px;
@@ -52,40 +53,63 @@
         .mode-tabs {
             display: flex;
             background: #e4e7eb;
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 2px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .mode-tab {
             flex: 1;
             text-align: center;
-            padding: 8px;
-            font-size: 13px;
+            padding: 6px; /* 🗜️ 縮小高度 */
+            font-size: 12px;
             font-weight: bold;
             color: #555;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 4px;
         }
         .mode-tab.active {
             background: white;
             color: #1f497d;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        .input-group {
+        /* 🔍 搜尋欄整合叉叉 */
+        .search-wrapper {
+            position: relative;
             display: flex;
-            gap: 6px;
+            align-items: center;
+            width: 100%;
         }
-        input[type="text"], select {
-            flex: 1;
-            padding: 10px;
+        .search-wrapper input {
+            width: 100%;
+            padding: 8px 32px 8px 10px; /* 留右方空間給叉叉 */
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 15px;
+            font-size: 14px;
             outline: none;
             background-color: white;
         }
+        .clear-btn {
+            position: absolute;
+            right: 10px;
+            font-size: 16px;
+            color: #999;
+            cursor: pointer;
+            display: none; /* 有輸入才顯示 */
+            user-select: none;
+            padding: 2px;
+        }
+        .clear-btn:hover {
+            color: #666;
+        }
+
         select {
+            padding: 6px 10px; /* 🗜️ 縮小高度 */
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            background-color: white;
             cursor: pointer;
         }
         
@@ -93,7 +117,7 @@
         .suggest-list {
             list-style: none;
             padding: 0;
-            margin: 8px 0 0 0;
+            margin: 6px 0 0 0;
             border: 1px solid #ddd;
             border-radius: 6px;
             max-height: 150px;
@@ -101,10 +125,10 @@
             display: none;
         }
         .suggest-item {
-            padding: 10px;
+            padding: 8px 10px; /* 🗜️ 縮小 */
             border-bottom: 1px solid #eee;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
         }
         .suggest-item:last-child {
             border-bottom: none;
@@ -113,48 +137,124 @@
             background-color: #f0f4f8;
         }
         
-        /* Result presentation */
-        .result-card {
-            display: none;
-        }
-        
-        /* Inventory List Table */
+        /* 📋 盤點結果條目：儲位、水表表號、口徑放同一行 */
         .inventory-list {
-            margin-top: 10px;
+            margin-top: 6px;
             border-top: 1px solid #eee;
-            padding-top: 8px;
+            padding-top: 6px;
         }
         .inventory-item {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 6px;
+            padding: 6px 8px; /* 🗜️ 縮小 */
+            margin-bottom: 4px; /* 🗜️ 縮小 */
             cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* 完美同行排列 */
             transition: background 0.2s;
         }
         .inventory-item:active {
             background: #f1f5f9;
         }
-        .inventory-meta {
+        .inv-row-left {
             display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #64748b;
-            margin-bottom: 4px;
+            align-items: center;
+            gap: 6px;
         }
-        .inventory-id {
+        .inv-badge-loc {
+            background-color: #e2f0d9;
+            color: #385723;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 45px;
+            text-align: center;
+        }
+        .inv-id-text {
             font-weight: bold;
             color: #1e293b;
-            font-size: 14px;
+        }
+        .inv-size-text {
+            color: #64748b;
+            font-size: 12px;
         }
 
+        /* 📍 右側滑入式定位結果面板 (Drawer) */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 500px; /* 與主容器一致 */
+            height: 100%;
+            background-color: #f5f7fa;
+            box-shadow: -3px 0 10px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0, 0, 0.2, 1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        .drawer-overlay.active {
+            transform: translateX(0);
+        }
+        .drawer-header {
+            background-color: #1f497d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+        }
+        .drawer-title {
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .drawer-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .drawer-close-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .drawer-content {
+            padding: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* 🗜️ 資訊欄位合併與高度緊湊優化 */
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 6px 0;
+            padding: 4px 0;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
+            font-size: 13px;
         }
         .info-row:last-child {
             border-bottom: none;
@@ -167,27 +267,18 @@
             color: #111;
             font-weight: bold;
         }
-        .highlight-loc {
-            background-color: #e2f0d9;
-            color: #385723;
-            padding: 1px 6px;
-            border-radius: 4px;
-        }
         
-        /* 💡 圖片視窗容器（優化：不限死高度，底色改為乾淨的淺灰色） */
+        /* 💡 圖片視窗容器 (維持 4:3 但縮小上下空隙) */
         .image-viewport-container {
             position: relative;
-            margin-top: 10px;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
-        
-        /* 🌟 重點優化：使用響應式寬高比，且底色改為質感淡灰色，不再死黑 */
         .image-viewport {
             width: 100%;
-            aspect-ratio: 4 / 3; /* 統一採用黃金比例 4:3 視窗，橫直圖皆適用 */
-            background-color: #eaeff4; /* 質感淺灰色，代替原本突兀的黑色 */
+            aspect-ratio: 4 / 3;
+            background-color: #eaeff4;
             overflow: hidden;
         }
         .image-stage {
@@ -204,8 +295,6 @@
             align-items: center;
             justify-content: center;
         }
-        
-        /* 🌟 重點優化：使用 contain 讓橫圖、直圖都完美居中縮放，不變形也不會切到紅框 */
         .slide img {
             max-width: 100%;
             max-height: 100%;
@@ -215,18 +304,18 @@
             display: block;
         }
         
-        /* 💡 融入照片中的極簡導覽箭頭 */
+        /* 導覽箭頭 */
         .overlay-nav {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background-color: rgba(31, 73, 125, 0.6); /* 使用水表系統主題深藍透明 */
+            background-color: rgba(31, 73, 125, 0.6);
             color: white;
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -240,11 +329,11 @@
         .no-data {
             text-align: center;
             color: #94a3b8;
-            padding: 20px 10px;
-            font-size: 14px;
+            padding: 15px 10px;
+            font-size: 13px;
         }
     </style>
-    <!-- 🌟 在這裡載入獨立的資料庫檔案 🌟 -->
+    <!-- 載入獨立資料庫 -->
     <script src="database.js"></script>
 </head>
 <body>
@@ -255,7 +344,7 @@
 
     <div class="container">
         <!-- 狀態提示 -->
-        <div id="loadStatus" style="font-size: 12px; margin-bottom: 10px; text-align: center; color: #27ae60; font-weight: bold;">
+        <div id="loadStatus" style="font-size: 11px; margin-bottom: 6px; text-align: center; color: #27ae60; font-weight: bold;">
             ⏳ 正在讀取倉庫離線資料庫...
         </div>
 
@@ -268,8 +357,10 @@
         <!-- 模式一：表號查詢 -->
         <div id="searchSection" class="card">
             <div class="card-title">表號模糊搜尋：</div>
-            <div class="input-group">
+            <div class="search-wrapper">
+                <!-- 🌟 1. 搜尋框整合叉叉按鈕 -->
                 <input type="text" id="searchInput" placeholder="輸入表號關鍵字..." oninput="handleFuzzySearch()">
+                <span class="clear-btn" id="clearSearchBtn" onclick="clearSearchInput()">✖</span>
             </div>
             <ul id="suggestList" class="suggest-list"></ul>
         </div>
@@ -277,47 +368,48 @@
         <!-- 模式二：盤點選項 -->
         <div id="inventorySection" class="card" style="display: none;">
             <div class="card-title">請選擇盤點條件：</div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 13px; min-width: 70px; color: #555;">儲位區域:</span>
-                    <select id="locSelect" onchange="filterInventory()">
-                        <option value="">-- 全部儲位 --</option>
-                    </select>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 13px; min-width: 70px; color: #555;">口徑規格:</span>
-                    <select id="sizeSelect" onchange="filterInventory()">
-                        <option value="">-- 全部口徑 --</option>
-                    </select>
-                </div>
+            <div style="display: flex; gap: 6px; width: 100%;">
+                <select id="locSelect" onchange="filterInventory()" style="flex: 1;">
+                    <option value="">-- 全部儲位 --</option>
+                </select>
+                <select id="sizeSelect" onchange="filterInventory()" style="flex: 1;">
+                    <option value="">-- 全部口徑 --</option>
+                </select>
             </div>
             
             <div class="inventory-list" id="inventoryList">
                 <div class="no-data">正在載入資料...</div>
             </div>
         </div>
+    </div>
 
-        <!-- 💡 統一結果展示與相片導引卡片 -->
-        <div id="resultCard" class="card result-card">
-            <div class="card-title">📍 儲位與定位導引</div>
-            <div class="info-row">
-                <span class="info-label">水表表號</span>
-                <span class="info-val" id="resId">-</span>
+    <!-- 🌟 2. 右側滑入式定位導引面板 (Drawer) -->
+    <div id="resultDrawer" class="drawer-overlay">
+        <div class="drawer-header">
+            <!-- 🌟 3. 區域編號與定位導引標頭合併在同一行 -->
+            <div class="drawer-title">
+                📍 定位導引 (<span id="resLocHeader">-</span>)
             </div>
-            <div class="info-row">
-                <span class="info-label">口徑 (mm)</span>
-                <span class="info-val" id="resSize">-</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">區域編號 (儲位)</span>
-                <span class="info-val highlight-loc" id="resLoc">-</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">備註說明</span>
-                <span class="info-val" id="resNote" style="color: #c00000;">-</span>
+            <button class="drawer-close-btn" onclick="closeResultDrawer()">返回 ❯</button>
+        </div>
+        
+        <div class="drawer-content">
+            <!-- 資訊面板 -->
+            <div class="info-card">
+                <div class="info-grid">
+                    <!-- 🌟 4. 表號與口徑合併在同一行 -->
+                    <div class="info-row">
+                        <span class="info-label" id="resId">-</span>
+                        <span class="info-val" id="resSize">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label" style="color: #666;">備註說明</span>
+                        <span class="info-val" id="resNote" style="color: #c00000; font-size: 12px;">-</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- 照片輪播導航 (動態生成) -->
+            <!-- 照片輪播 (自適應 4:3 寬高比) -->
             <div class="image-viewport-container">
                 <button class="overlay-nav nav-left" id="btnPrev" onclick="moveStep(-1)">❮</button>
                 <button class="overlay-nav nav-right" id="btnNext" onclick="moveStep(1)">❯</button>
@@ -388,14 +480,21 @@
                 document.getElementById("inventorySection").style.display = "block";
                 filterInventory();
             }
+            closeResultDrawer(); // 切換模式時，順便關閉可能開啟的 Drawer
         }
 
+        // 🌟 1. 搜尋輸入控制：顯示/隱藏叉叉
         function handleFuzzySearch() {
-            const input = document.getElementById("searchInput").value.trim().toLowerCase();
+            const inputField = document.getElementById("searchInput");
+            const input = inputField.value.trim().toLowerCase();
+            const clearBtn = document.getElementById("clearSearchBtn");
             const suggestList = document.getElementById("suggestList");
             suggestList.innerHTML = "";
 
-            if (!input) {
+            if (input) {
+                clearBtn.style.display = "block"; // 顯示叉叉
+            } else {
+                clearBtn.style.display = "none"; // 隱藏叉叉
                 suggestList.style.display = "none";
                 return;
             }
@@ -406,7 +505,7 @@
                 matches.forEach(item => {
                     const li = document.createElement("li");
                     li.className = "suggest-item";
-                    li.innerHTML = `⚙️ 表號: <strong>${item.id}</strong> (儲位: ${item.loc} | ${item.size}mm)`;
+                    li.innerHTML = `⚙️ <strong>${item.id}</strong> (儲位: ${item.loc} | ${item.size}mm)`;
                     li.onclick = () => selectItem(item);
                     suggestList.appendChild(li);
                 });
@@ -422,12 +521,22 @@
             }
         }
 
+        // 🌟 1. 點擊叉叉清除搜尋
+        function clearSearchInput() {
+            const inputField = document.getElementById("searchInput");
+            inputField.value = "";
+            document.getElementById("clearSearchBtn").style.display = "none";
+            document.getElementById("suggestList").style.display = "none";
+            inputField.focus();
+        }
+
         function selectItem(item) {
             document.getElementById("searchInput").value = item.id;
             document.getElementById("suggestList").style.display = "none";
             displayResult(item);
         }
 
+        // 🌟 5. 盤點篩選結果：儲位、水表表號、口徑放同一行！
         function filterInventory() {
             const selectedLoc = document.getElementById("locSelect").value;
             const selectedSize = document.getElementById("sizeSelect").value;
@@ -449,13 +558,13 @@
                 filtered.forEach(item => {
                     const div = document.createElement("div");
                     div.className = "inventory-item";
+                    // 🌟 同行簡潔排版
                     div.innerHTML = `
-                        <div class="inventory-meta">
-                            <span>儲位: <strong style="color: #1f497d;">${item.loc}</strong></span>
-                            <span>口徑: ${item.size}mm</span>
+                        <div class="inv-row-left">
+                            <span class="inv-badge-loc">${item.loc}</span>
+                            <span class="inv-id-text">⚙️ ${item.id}</span>
                         </div>
-                        <div class="inventory-id">⚙️ ${item.id}</div>
-                        <div style="font-size: 12px; color: #666; margin-top: 4px;">備註: ${item.note}</div>
+                        <span class="inv-size-text">${item.size} mm</span>
                     `;
                     div.onclick = () => displayResult(item);
                     listContainer.appendChild(div);
@@ -465,11 +574,13 @@
             }
         }
 
+        // 🌟 2. 顯示定位結果 (改為從右方滑入)
         function displayResult(item) {
-            document.getElementById("resId").innerText = item.id;
-            document.getElementById("resLoc").innerText = item.loc;
-            document.getElementById("resNote").innerText = item.note;
-            document.getElementById("resSize").innerText = item.size + " mm";
+            // 設定標頭與資訊
+            document.getElementById("resLocHeader").innerText = "儲位: " + item.loc; // 🌟 3. 區域編號與標題同行
+            document.getElementById("resId").innerText = "⚙️ 表號: " + item.id;     // 🌟 4. 表號與口徑同行 (左)
+            document.getElementById("resSize").innerText = item.size + " mm";      // 🌟 4. 表號與口徑同行 (右)
+            document.getElementById("resNote").innerText = item.note || "無備註";
 
             const stage = document.getElementById("imageStage");
             stage.innerHTML = "";
@@ -494,10 +605,14 @@
                 stage.appendChild(slideDiv);
             });
 
-            const resultCard = document.getElementById("resultCard");
-            resultCard.style.display = "block";
+            // 啟用從右邊滑入的動畫
+            document.getElementById("resultDrawer").classList.add("active");
             goToStep(0);
-            resultCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 🌟 2. 關閉右側抽屜面板
+        function closeResultDrawer() {
+            document.getElementById("resultDrawer").classList.remove("active");
         }
 
         function goToStep(stepIndex) {
