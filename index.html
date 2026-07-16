@@ -2,7 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 🌟 設定 viewport 限制使用者縮放，這能在大部分手機上升級防自動放大 🌟 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>水表倉庫儲位查詢與盤點系統</title>
     <style>
         * {
@@ -80,34 +81,37 @@
             align-items: center;
             width: 100%;
         }
+        /* 🌟 核心修改一：字型大小改為 16px（這是防止 iOS Safari 輸入時自動放大的魔法設定！） 🌟 */
+        /* 為了配合 16px，padding 調整為 6px 上下，讓輸入框維持緊湊不臃腫 */
         .search-wrapper input {
             width: 100%;
-            padding: 8px 32px 8px 10px;
+            padding: 6px 32px 6px 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 16px; /* 👈 防止手機放大必備設定 */
             outline: none;
             background-color: white;
         }
         .clear-btn {
             position: absolute;
             right: 10px;
-            font-size: 16px;
+            font-size: 18px; /* 稍微放大叉叉，讓手指好按 */
             color: #999;
             cursor: pointer;
             display: none;
             user-select: none;
-            padding: 2px;
+            padding: 4px;
         }
         .clear-btn:hover {
             color: #666;
         }
 
+        /* 🌟 核心修改二：下拉選單字型也改為 16px，防止點選下拉選單時也被自動放大 🌟 */
         select {
             padding: 6px 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 16px; /* 👈 防止手機放大必備設定 */
             outline: none;
             background-color: white;
             cursor: pointer;
@@ -335,7 +339,7 @@
 
         /* 🔍 主頁直接顯示搜尋結果卡片 */
         .main-result-card {
-            display: none; /* 預設隱藏 */
+            display: none;
             padding: 0;
             background: transparent;
             box-shadow: none;
@@ -374,7 +378,7 @@
                 <ul id="suggestList" class="suggest-list"></ul>
             </div>
 
-            <!-- 🌟 表號查詢模式專用：直接顯示在下方的結果導引卡片 🌟 -->
+            <!-- 表號查詢模式專用：直接顯示在下方的結果導引卡片 -->
             <div id="searchResultCard" class="main-result-card">
                 <!-- 標題欄：定位導引與儲位合併一行 -->
                 <div class="card" style="background-color: #1f497d; color: white; padding: 6px 10px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
@@ -397,7 +401,7 @@
                         </div>
                     </div>
 
-                    <!-- 照片輪播 (直接顯示於下方) -->
+                    <!-- 照片輪播 -->
                     <div class="image-viewport-container" style="margin-top: 6px;">
                         <button class="overlay-nav nav-left" id="searchBtnPrev" onclick="moveStepHybrid(-1)">❮</button>
                         <button class="overlay-nav nav-right" id="searchBtnNext" onclick="moveStepHybrid(1)">❯</button>
@@ -432,7 +436,7 @@
         </div>
     </div>
 
-    <!-- 🌟 盤點模式專用：右側滑入式定位導引面板 (Drawer) 🌟 -->
+    <!-- 📋 盤點模式專用：右側滑入面板 -->
     <div id="resultDrawer" class="drawer-overlay">
         <div class="drawer-header">
             <div class="drawer-title">
@@ -474,7 +478,7 @@
         let mockDatabase = [];
         let currentStep = 0;
         let totalSteps = 0;
-        let currentActiveMode = 'search'; // 'search' 或 'inventory'
+        let currentActiveMode = 'search';
 
         window.onload = function() {
             const status = document.getElementById("loadStatus");
@@ -529,7 +533,7 @@
                 document.getElementById("inventorySection").style.display = "block";
             }
             closeResultDrawer();
-            document.getElementById("searchResultCard").style.display = "none"; // 切換模式時隱藏搜尋結果
+            document.getElementById("searchResultCard").style.display = "none";
         }
 
         function handleFuzzySearch() {
@@ -544,7 +548,7 @@
             } else {
                 clearBtn.style.display = "none";
                 suggestList.style.display = "none";
-                document.getElementById("searchResultCard").style.display = "none"; // 沒有輸入就隱藏結果卡片
+                document.getElementById("searchResultCard").style.display = "none";
                 return;
             }
 
@@ -575,7 +579,7 @@
             inputField.value = "";
             document.getElementById("clearSearchBtn").style.display = "none";
             document.getElementById("suggestList").style.display = "none";
-            document.getElementById("searchResultCard").style.display = "none"; // 清除時隱藏結果
+            document.getElementById("searchResultCard").style.display = "none";
             inputField.focus();
         }
 
@@ -621,7 +625,6 @@
             }
         }
 
-        // 🌟 雙模式智慧渲染照片與資訊 🌟
         function displayResult(item) {
             const validImages = [];
             if (item.far_img) validImages.push({ src: item.far_img, alt: "遠景" });
@@ -632,7 +635,6 @@
             totalSteps = validImages.length;
 
             if (currentActiveMode === 'search') {
-                // 🔍 模式一：表號查詢（直接顯示在主介面下方）
                 document.getElementById("searchResLocHeader").innerText = "儲位: " + item.loc;
                 document.getElementById("searchResId").innerText = "⚙️ 表號: " + item.id;
                 document.getElementById("searchResSize").innerText = item.size + " mm";
@@ -654,11 +656,9 @@
                 document.getElementById("searchResultCard").style.display = "block";
                 goToStepHybrid(0);
                 
-                // 稍微平滑滾動到結果，方便單手看圖
                 document.getElementById("searchResultCard").scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             } else {
-                // 📋 模式二：儲位盤點（右側滑入 Drawer）
                 document.getElementById("resLocHeader").innerText = "儲位: " + item.loc;
                 document.getElementById("resId").innerText = "⚙️ 表號: " + item.id;
                 document.getElementById("resSize").innerText = item.size + " mm";
@@ -686,7 +686,6 @@
             document.getElementById("resultDrawer").classList.remove("active");
         }
 
-        // 🌟 雙模式共用的相片滑動控制 🌟
         function goToStepHybrid(stepIndex) {
             currentStep = stepIndex;
             const stageId = (currentActiveMode === 'search') ? "searchImageStage" : "imageStage";
