@@ -48,32 +48,6 @@
             gap: 5px;
         }
         
-        /* ⚙️ 資料來源設定區 (預設隱藏) */
-        .config-toggle {
-            text-align: right;
-            font-size: 11px;
-            margin-bottom: 6px;
-        }
-        .config-toggle span {
-            color: #1f497d;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        .config-box {
-            background-color: #fef9e7;
-            border: 1px solid #f5b041;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
-            display: none;
-        }
-        .config-box p {
-            margin: 0 0 8px 0;
-            font-size: 12px;
-            color: #7e5109;
-            line-height: 1.4;
-        }
-
         /* Tab Styles */
         .mode-tabs {
             display: flex;
@@ -113,19 +87,6 @@
         }
         select {
             cursor: pointer;
-        }
-        .btn {
-            background-color: #1f497d;
-            color: white;
-            border: none;
-            padding: 0 15px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-success {
-            background-color: #27ae60;
         }
         
         /* Fuzzy Search List */
@@ -213,7 +174,7 @@
             border-radius: 4px;
         }
         
-        /* 💡 圖片視窗容器 */
+        /* 💡 圖片視窗容器（優化：不限死高度，底色改為乾淨的淺灰色） */
         .image-viewport-container {
             position: relative;
             margin-top: 10px;
@@ -221,23 +182,36 @@
             overflow: hidden;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
+        
+        /* 🌟 重點優化：使用響應式寬高比，且底色改為質感淡灰色，不再死黑 */
         .image-viewport {
             width: 100%;
+            aspect-ratio: 4 / 3; /* 統一採用黃金比例 4:3 視窗，橫直圖皆適用 */
+            background-color: #eaeff4; /* 質感淺灰色，代替原本突兀的黑色 */
             overflow: hidden;
-            background-color: #000;
         }
         .image-stage {
             display: flex;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
+            height: 100%;
         }
         .slide {
             min-width: 100%;
             width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        
+        /* 🌟 重點優化：使用 contain 讓橫圖、直圖都完美居中縮放，不變形也不會切到紅框 */
         .slide img {
-            width: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
             height: auto;
+            object-fit: contain;
             display: block;
         }
         
@@ -246,7 +220,7 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(31, 73, 125, 0.6); /* 使用水表系統主題深藍透明 */
             color: white;
             border: none;
             width: 36px;
@@ -270,6 +244,8 @@
             font-size: 14px;
         }
     </style>
+    <!-- 🌟 在這裡載入獨立的資料庫檔案 🌟 -->
+    <script src="database.js"></script>
 </head>
 <body>
 
@@ -278,23 +254,9 @@
     </div>
 
     <div class="container">
-        <!-- 展開/收合設定按鈕 -->
-        <div class="config-toggle">
-            <span onclick="toggleConfig()">⚙️ 進階設定 (Google Sheets 網址)</span>
-        </div>
-
-        <!-- ⚙️ 雲端資料對接設定區 (預設收合) -->
-        <div id="configBox" class="config-box">
-            <div class="card-title" style="color: #7e5109; margin-bottom: 4px;">🔗 Google 試算表 CSV 網址：</div>
-            <div class="input-group">
-                <input type="text" id="csvUrlInput" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSGZ9t5UjSDIS2WcJDPU820zPj5vUfi3VvuCpoBwHesBa8NfoOeePneLlm7rxZvJxJMVxAEaFqObsC6/pub?output=csv" placeholder="請貼上 CSV 連結...">
-                <button class="btn btn-success" onclick="loadGoogleSheetData()">重新載入</button>
-            </div>
-        </div>
-
         <!-- 狀態提示 -->
-        <div id="loadStatus" style="font-size: 12px; margin-bottom: 10px; text-align: center; color: #d35400; font-weight: bold;">
-            ⏳ 正在從雲端下載最新水表資料...
+        <div id="loadStatus" style="font-size: 12px; margin-bottom: 10px; text-align: center; color: #27ae60; font-weight: bold;">
+            ⏳ 正在讀取倉庫離線資料庫...
         </div>
 
         <!-- 模式切換 -->
@@ -331,7 +293,7 @@
             </div>
             
             <div class="inventory-list" id="inventoryList">
-                <div class="no-data">請先載入雲端資料。</div>
+                <div class="no-data">正在載入資料...</div>
             </div>
         </div>
 
@@ -362,7 +324,7 @@
 
                 <div class="image-viewport">
                     <div class="image-stage" id="imageStage">
-                        <!-- 由 JS 動態生成幻燈片，跳過空缺照片 -->
+                        <!-- 由 JS 動態生成 -->
                     </div>
                 </div>
             </div>
@@ -374,97 +336,18 @@
         let currentStep = 0;
         let totalSteps = 0;
 
-        // 🌟 網頁載入時，自動執行載入雲端試算表資料
         window.onload = function() {
-            loadGoogleSheetData();
-        };
-
-        function toggleConfig() {
-            const box = document.getElementById("configBox");
-            box.style.display = box.style.display === "block" ? "none" : "block";
-        }
-
-        // ⚡️ 動態讀取 Google Sheets 實作
-        function loadGoogleSheetData() {
-            const url = document.getElementById("csvUrlInput").value.trim();
             const status = document.getElementById("loadStatus");
-            
-            status.innerText = "⏳ 正在同步自來水雲端資料庫...";
-            status.style.color = "#d35400";
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error("網路連線錯誤。");
-                    return response.text();
-                })
-                .then(csvText => {
-                    parseCSVToDatabase(csvText);
-                    status.innerText = `✅ 已同步最新資料 (共 ${mockDatabase.length} 顆水表)`;
-                    status.style.color = "#27ae60";
-                    initFilters();
-                })
-                .catch(err => {
-                    console.error(err);
-                    status.innerText = "❌ 資料庫同步失敗！請確認試算表已共用、發布為 CSV，且網址正確。";
-                    status.style.color = "#c0392b";
-                });
-        }
-
-        // CSV 解析程式碼
-        function parseCSVToDatabase(csvText) {
-            const lines = csvText.split(/\r?\n/);
-            if (lines.length < 2) return;
-
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-            
-            const idxId = headers.indexOf("水表表號");
-            const idxSize = headers.indexOf("口徑");
-            const idxLoc = headers.indexOf("區域編號");
-            const idxFar = headers.indexOf("遠景照");
-            const idxNear = headers.indexOf("定位照");
-            const idxDetail = headers.indexOf("水表照"); 
-            const idxPointer = headers.indexOf("指針照");
-            const idxNote = headers.indexOf("備註");
-
-            const tempDb = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                
-                const row = parseCSVRow(lines[i]);
-                if (row.length < headers.length) continue;
-
-                const id = row[idxId] ? row[idxId].trim() : "";
-                if (!id) continue;
-
-                tempDb.push({
-                    id: id,
-                    size: row[idxSize] ? row[idxSize].trim() : "",
-                    loc: row[idxLoc] ? row[idxLoc].trim() : "",
-                    far_img: row[idxFar] ? row[idxFar].trim() : "",
-                    near_img: row[idxNear] ? row[idxNear].trim() : "",
-                    detail_img: idxDetail !== -1 && row[idxDetail] ? row[idxDetail].trim() : "",
-                    pointer_img: idxPointer !== -1 && row[idxPointer] ? row[idxPointer].trim() : "",
-                    note: row[idxNote] ? row[idxNote].trim() : ""
-                });
+            if (window.warehouseDatabase && Array.isArray(window.warehouseDatabase)) {
+                mockDatabase = window.warehouseDatabase;
+                status.innerText = `✅ 離線資料庫載入成功 (共 ${mockDatabase.length} 顆水表)`;
+                status.style.color = "#27ae60";
+                initFilters();
+            } else {
+                status.innerText = "❌ 讀取失敗！請確認 database.js 檔案存在且格式正確。";
+                status.style.color = "#c0392b";
             }
-
-            mockDatabase = tempDb;
-        }
-
-        // CSV 雙引號處理
-        function parseCSVRow(text) {
-            let p = '', r = [];
-            let q = false;
-            for (let i = 0; i < text.length; i++) {
-                let c = text.charAt(i);
-                if (c === '"') { q = !q; }
-                else if (c === ',' && !q) { r.push(p); p = ''; }
-                else { p += c; }
-            }
-            r.push(p);
-            return r.map(x => x.replace(/^"|"$/g, ''));
-        }
+        };
 
         function initFilters() {
             const locSelect = document.getElementById("locSelect");
@@ -552,7 +435,7 @@
             listContainer.innerHTML = "";
 
             if (mockDatabase.length === 0) {
-                listContainer.innerHTML = `<div class="no-data">請先載入雲端資料。</div>`;
+                listContainer.innerHTML = `<div class="no-data">倉庫無任何水表資料。</div>`;
                 return;
             }
 
@@ -591,7 +474,6 @@
             const stage = document.getElementById("imageStage");
             stage.innerHTML = "";
 
-            // 動態排除空缺，連續重排
             const validImages = [];
             if (item.far_img) validImages.push({ src: item.far_img, alt: "遠景" });
             if (item.near_img) validImages.push({ src: item.near_img, alt: "定位" });
