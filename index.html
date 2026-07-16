@@ -20,24 +20,24 @@
             background-color: #1f497d;
             color: white;
             text-align: center;
-            padding: 8px 10px; /* 🗜️ 縮小高度 */
+            padding: 8px 10px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         .header h1 {
             margin: 0;
-            font-size: 16px; /* 🗜️ 縮小字型 */
+            font-size: 16px;
         }
         .container {
             max-width: 500px;
             margin: 0 auto;
-            padding: 8px; /* 🗜️ 縮小內距 */
+            padding: 8px;
         }
         .card {
             background: white;
             border-radius: 8px;
-            padding: 8px 10px; /* 🗜️ 縮小內距 */
+            padding: 8px 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 8px; /* 🗜️ 縮小間距 */
+            margin-bottom: 8px;
         }
         .card-title {
             font-size: 12px;
@@ -60,7 +60,7 @@
         .mode-tab {
             flex: 1;
             text-align: center;
-            padding: 6px; /* 🗜️ 縮小高度 */
+            padding: 6px;
             font-size: 12px;
             font-weight: bold;
             color: #555;
@@ -82,7 +82,7 @@
         }
         .search-wrapper input {
             width: 100%;
-            padding: 8px 32px 8px 10px; /* 留右方空間給叉叉 */
+            padding: 8px 32px 8px 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 14px;
@@ -95,7 +95,7 @@
             font-size: 16px;
             color: #999;
             cursor: pointer;
-            display: none; /* 有輸入才顯示 */
+            display: none;
             user-select: none;
             padding: 2px;
         }
@@ -104,7 +104,7 @@
         }
 
         select {
-            padding: 6px 10px; /* 🗜️ 縮小高度 */
+            padding: 6px 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 13px;
@@ -125,7 +125,7 @@
             display: none;
         }
         .suggest-item {
-            padding: 8px 10px; /* 🗜️ 縮小 */
+            padding: 8px 10px;
             border-bottom: 1px solid #eee;
             cursor: pointer;
             font-size: 13px;
@@ -137,7 +137,7 @@
             background-color: #f0f4f8;
         }
         
-        /* 📋 盤點結果條目：儲位、水表表號、口徑放同一行 */
+        /* 📋 盤點結果條目 */
         .inventory-list {
             margin-top: 6px;
             border-top: 1px solid #eee;
@@ -147,13 +147,13 @@
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            padding: 6px 8px; /* 🗜️ 縮小 */
-            margin-bottom: 4px; /* 🗜️ 縮小 */
+            padding: 6px 8px;
+            margin-bottom: 4px;
             cursor: pointer;
             font-size: 13px;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* 完美同行排列 */
+            justify-content: space-between;
             transition: background 0.2s;
         }
         .inventory-item:active {
@@ -183,13 +183,13 @@
             font-size: 12px;
         }
 
-        /* 📍 右側滑入式定位結果面板 (Drawer) */
+        /* 📍 右側滑入式定位結果面板 (Drawer) - 盤點模式專用 */
         .drawer-overlay {
             position: fixed;
             top: 0;
             right: 0;
             width: 100%;
-            max-width: 500px; /* 與主容器一致 */
+            max-width: 500px;
             height: 100%;
             background-color: #f5f7fa;
             box-shadow: -3px 0 10px rgba(0,0,0,0.15);
@@ -236,7 +236,7 @@
             flex: 1;
         }
 
-        /* 🗜️ 資訊欄位合併與高度緊湊優化 */
+        /* 🗜️ 資訊欄位與緊湊優化 */
         .info-card {
             background: white;
             border-radius: 8px;
@@ -268,7 +268,7 @@
             font-weight: bold;
         }
         
-        /* 💡 圖片視窗容器 (維持 4:3 但縮小上下空隙) */
+        /* 💡 圖片視窗容器 */
         .image-viewport-container {
             position: relative;
             border-radius: 8px;
@@ -332,6 +332,15 @@
             padding: 15px 10px;
             font-size: 13px;
         }
+
+        /* 🔍 主頁直接顯示搜尋結果卡片 */
+        .main-result-card {
+            display: none; /* 預設隱藏 */
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+            margin-top: 8px;
+        }
     </style>
     <!-- 載入獨立資料庫 -->
     <script src="database.js"></script>
@@ -355,38 +364,77 @@
         </div>
 
         <!-- 模式一：表號查詢 -->
-        <div id="searchSection" class="card">
-            <div class="card-title">表號模糊搜尋：</div>
-            <div class="search-wrapper">
-                <!-- 🌟 1. 搜尋框整合叉叉按鈕 -->
-                <input type="text" id="searchInput" placeholder="輸入表號關鍵字..." oninput="handleFuzzySearch()">
-                <span class="clear-btn" id="clearSearchBtn" onclick="clearSearchInput()">✖</span>
+        <div id="searchSection">
+            <div class="card">
+                <div class="card-title">表號模糊搜尋：</div>
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" placeholder="輸入表號關鍵字..." oninput="handleFuzzySearch()">
+                    <span class="clear-btn" id="clearSearchBtn" onclick="clearSearchInput()">✖</span>
+                </div>
+                <ul id="suggestList" class="suggest-list"></ul>
             </div>
-            <ul id="suggestList" class="suggest-list"></ul>
+
+            <!-- 🌟 表號查詢模式專用：直接顯示在下方的結果導引卡片 🌟 -->
+            <div id="searchResultCard" class="main-result-card">
+                <!-- 標題欄：定位導引與儲位合併一行 -->
+                <div class="card" style="background-color: #1f497d; color: white; padding: 6px 10px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
+                    <div style="font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
+                        <span>📍 定位導引</span>
+                        <span id="searchResLocHeader" style="background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 4px; font-size: 11px;">-</span>
+                    </div>
+                </div>
+
+                <!-- 資訊面板：表號和口徑合併一行 -->
+                <div class="card" style="border-radius: 0 0 8px 8px; margin-top: 0; margin-bottom: 8px;">
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="info-label" id="searchResId">-</span>
+                            <span class="info-val" id="searchResSize">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label" style="color: #666;">備註說明</span>
+                            <span class="info-val" id="searchResNote" style="color: #c00000; font-size: 12px;">-</span>
+                        </div>
+                    </div>
+
+                    <!-- 照片輪播 (直接顯示於下方) -->
+                    <div class="image-viewport-container" style="margin-top: 6px;">
+                        <button class="overlay-nav nav-left" id="searchBtnPrev" onclick="moveStepHybrid(-1)">❮</button>
+                        <button class="overlay-nav nav-right" id="searchBtnNext" onclick="moveStepHybrid(1)">❯</button>
+
+                        <div class="image-viewport">
+                            <div class="image-stage" id="searchImageStage">
+                                <!-- 由 JS 動態生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- 模式二：盤點選項 -->
-        <div id="inventorySection" class="card" style="display: none;">
-            <div class="card-title">請選擇盤點條件：</div>
-            <div style="display: flex; gap: 6px; width: 100%;">
-                <select id="locSelect" onchange="filterInventory()" style="flex: 1;">
-                    <option value="">-- 全部儲位 --</option>
-                </select>
-                <select id="sizeSelect" onchange="filterInventory()" style="flex: 1;">
-                    <option value="">-- 全部口徑 --</option>
-                </select>
-            </div>
-            
-            <div class="inventory-list" id="inventoryList">
-                <div class="no-data">正在載入資料...</div>
+        <div id="inventorySection" style="display: none;">
+            <div class="card">
+                <div class="card-title">請選擇盤點條件：</div>
+                <div style="display: flex; gap: 6px; width: 100%;">
+                    <select id="locSelect" onchange="filterInventory()" style="flex: 1;">
+                        <option value="">-- 全部儲位 --</option>
+                    </select>
+                    <select id="sizeSelect" onchange="filterInventory()" style="flex: 1;">
+                        <option value="">-- 全部口徑 --</option>
+                    </select>
+                </div>
+                
+                <div class="inventory-list" id="inventoryList">
+                    <div class="no-data">正在載入資料...</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 🌟 2. 右側滑入式定位導引面板 (Drawer) -->
+    <!-- 🌟 盤點模式專用：右側滑入式定位導引面板 (Drawer) 🌟 -->
     <div id="resultDrawer" class="drawer-overlay">
         <div class="drawer-header">
-            <!-- 🌟 3. 區域編號與定位導引標頭合併在同一行 -->
             <div class="drawer-title">
                 📍 定位導引 (<span id="resLocHeader">-</span>)
             </div>
@@ -397,7 +445,6 @@
             <!-- 資訊面板 -->
             <div class="info-card">
                 <div class="info-grid">
-                    <!-- 🌟 4. 表號與口徑合併在同一行 -->
                     <div class="info-row">
                         <span class="info-label" id="resId">-</span>
                         <span class="info-val" id="resSize">-</span>
@@ -409,10 +456,10 @@
                 </div>
             </div>
 
-            <!-- 照片輪播 (自適應 4:3 寬高比) -->
+            <!-- 照片輪播 -->
             <div class="image-viewport-container">
-                <button class="overlay-nav nav-left" id="btnPrev" onclick="moveStep(-1)">❮</button>
-                <button class="overlay-nav nav-right" id="btnNext" onclick="moveStep(1)">❯</button>
+                <button class="overlay-nav nav-left" id="btnPrev" onclick="moveStepHybrid(-1)">❮</button>
+                <button class="overlay-nav nav-right" id="btnNext" onclick="moveStepHybrid(1)">❯</button>
 
                 <div class="image-viewport">
                     <div class="image-stage" id="imageStage">
@@ -427,6 +474,7 @@
         let mockDatabase = [];
         let currentStep = 0;
         let totalSteps = 0;
+        let currentActiveMode = 'search'; // 'search' 或 'inventory'
 
         window.onload = function() {
             const status = document.getElementById("loadStatus");
@@ -469,6 +517,7 @@
         }
 
         function switchMode(mode) {
+            currentActiveMode = mode;
             document.querySelectorAll(".mode-tab").forEach(tab => tab.classList.remove("active"));
             if (mode === 'search') {
                 document.querySelector(".mode-tab:nth-child(1)").classList.add("active");
@@ -478,12 +527,11 @@
                 document.querySelector(".mode-tab:nth-child(2)").classList.add("active");
                 document.getElementById("searchSection").style.display = "none";
                 document.getElementById("inventorySection").style.display = "block";
-                filterInventory();
             }
-            closeResultDrawer(); // 切換模式時，順便關閉可能開啟的 Drawer
+            closeResultDrawer();
+            document.getElementById("searchResultCard").style.display = "none"; // 切換模式時隱藏搜尋結果
         }
 
-        // 🌟 1. 搜尋輸入控制：顯示/隱藏叉叉
         function handleFuzzySearch() {
             const inputField = document.getElementById("searchInput");
             const input = inputField.value.trim().toLowerCase();
@@ -492,10 +540,11 @@
             suggestList.innerHTML = "";
 
             if (input) {
-                clearBtn.style.display = "block"; // 顯示叉叉
+                clearBtn.style.display = "block";
             } else {
-                clearBtn.style.display = "none"; // 隱藏叉叉
+                clearBtn.style.display = "none";
                 suggestList.style.display = "none";
+                document.getElementById("searchResultCard").style.display = "none"; // 沒有輸入就隱藏結果卡片
                 return;
             }
 
@@ -521,12 +570,12 @@
             }
         }
 
-        // 🌟 1. 點擊叉叉清除搜尋
         function clearSearchInput() {
             const inputField = document.getElementById("searchInput");
             inputField.value = "";
             document.getElementById("clearSearchBtn").style.display = "none";
             document.getElementById("suggestList").style.display = "none";
+            document.getElementById("searchResultCard").style.display = "none"; // 清除時隱藏結果
             inputField.focus();
         }
 
@@ -536,7 +585,6 @@
             displayResult(item);
         }
 
-        // 🌟 5. 盤點篩選結果：儲位、水表表號、口徑放同一行！
         function filterInventory() {
             const selectedLoc = document.getElementById("locSelect").value;
             const selectedSize = document.getElementById("sizeSelect").value;
@@ -558,7 +606,6 @@
                 filtered.forEach(item => {
                     const div = document.createElement("div");
                     div.className = "inventory-item";
-                    // 🌟 同行簡潔排版
                     div.innerHTML = `
                         <div class="inv-row-left">
                             <span class="inv-badge-loc">${item.loc}</span>
@@ -574,17 +621,8 @@
             }
         }
 
-        // 🌟 2. 顯示定位結果 (改為從右方滑入)
+        // 🌟 雙模式智慧渲染照片與資訊 🌟
         function displayResult(item) {
-            // 設定標頭與資訊
-            document.getElementById("resLocHeader").innerText = "儲位: " + item.loc; // 🌟 3. 區域編號與標題同行
-            document.getElementById("resId").innerText = "⚙️ 表號: " + item.id;     // 🌟 4. 表號與口徑同行 (左)
-            document.getElementById("resSize").innerText = item.size + " mm";      // 🌟 4. 表號與口徑同行 (右)
-            document.getElementById("resNote").innerText = item.note || "無備註";
-
-            const stage = document.getElementById("imageStage");
-            stage.innerHTML = "";
-
             const validImages = [];
             if (item.far_img) validImages.push({ src: item.far_img, alt: "遠景" });
             if (item.near_img) validImages.push({ src: item.near_img, alt: "定位" });
@@ -593,42 +631,80 @@
 
             totalSteps = validImages.length;
 
-            validImages.forEach(imgData => {
-                const slideDiv = document.createElement("div");
-                slideDiv.className = "slide";
-                
-                const imgNode = document.createElement("img");
-                imgNode.src = imgData.src;
-                imgNode.alt = imgData.alt;
-                
-                slideDiv.appendChild(imgNode);
-                stage.appendChild(slideDiv);
-            });
+            if (currentActiveMode === 'search') {
+                // 🔍 模式一：表號查詢（直接顯示在主介面下方）
+                document.getElementById("searchResLocHeader").innerText = "儲位: " + item.loc;
+                document.getElementById("searchResId").innerText = "⚙️ 表號: " + item.id;
+                document.getElementById("searchResSize").innerText = item.size + " mm";
+                document.getElementById("searchResNote").innerText = item.note || "無備註";
 
-            // 啟用從右邊滑入的動畫
-            document.getElementById("resultDrawer").classList.add("active");
-            goToStep(0);
+                const stage = document.getElementById("searchImageStage");
+                stage.innerHTML = "";
+
+                validImages.forEach(imgData => {
+                    const slideDiv = document.createElement("div");
+                    slideDiv.className = "slide";
+                    const imgNode = document.createElement("img");
+                    imgNode.src = imgData.src;
+                    imgNode.alt = imgData.alt;
+                    slideDiv.appendChild(imgNode);
+                    stage.appendChild(slideDiv);
+                });
+
+                document.getElementById("searchResultCard").style.display = "block";
+                goToStepHybrid(0);
+                
+                // 稍微平滑滾動到結果，方便單手看圖
+                document.getElementById("searchResultCard").scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } else {
+                // 📋 模式二：儲位盤點（右側滑入 Drawer）
+                document.getElementById("resLocHeader").innerText = "儲位: " + item.loc;
+                document.getElementById("resId").innerText = "⚙️ 表號: " + item.id;
+                document.getElementById("resSize").innerText = item.size + " mm";
+                document.getElementById("resNote").innerText = item.note || "無備註";
+
+                const stage = document.getElementById("imageStage");
+                stage.innerHTML = "";
+
+                validImages.forEach(imgData => {
+                    const slideDiv = document.createElement("div");
+                    slideDiv.className = "slide";
+                    const imgNode = document.createElement("img");
+                    imgNode.src = imgData.src;
+                    imgNode.alt = imgData.alt;
+                    slideDiv.appendChild(imgNode);
+                    stage.appendChild(slideDiv);
+                });
+
+                document.getElementById("resultDrawer").classList.add("active");
+                goToStepHybrid(0);
+            }
         }
 
-        // 🌟 2. 關閉右側抽屜面板
         function closeResultDrawer() {
             document.getElementById("resultDrawer").classList.remove("active");
         }
 
-        function goToStep(stepIndex) {
+        // 🌟 雙模式共用的相片滑動控制 🌟
+        function goToStepHybrid(stepIndex) {
             currentStep = stepIndex;
-            const stage = document.getElementById("imageStage");
+            const stageId = (currentActiveMode === 'search') ? "searchImageStage" : "imageStage";
+            const prevBtnId = (currentActiveMode === 'search') ? "searchBtnPrev" : "btnPrev";
+            const nextBtnId = (currentActiveMode === 'search') ? "searchBtnNext" : "btnNext";
+
+            const stage = document.getElementById(stageId);
             const percentage = -stepIndex * 100;
             stage.style.transform = `translateX(${percentage}%)`;
 
-            document.getElementById("btnPrev").style.display = stepIndex === 0 ? "none" : "flex";
-            document.getElementById("btnNext").style.display = stepIndex === (totalSteps - 1) ? "none" : "flex";
+            document.getElementById(prevBtnId).style.display = stepIndex === 0 ? "none" : "flex";
+            document.getElementById(nextBtnId).style.display = stepIndex === (totalSteps - 1) ? "none" : "flex";
         }
 
-        function moveStep(direction) {
+        function moveStepHybrid(direction) {
             let next = currentStep + direction;
             if (next >= 0 && next < totalSteps) {
-                goToStep(next);
+                goToStepHybrid(next);
             }
         }
     </script>
