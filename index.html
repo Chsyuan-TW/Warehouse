@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- 🌟 設定 viewport 限制使用者縮放，這能在大部分手機上升級防自動放大 🌟 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>水表倉庫儲位查詢與盤點系統</title>
+    <title>水表倉庫存放位置與盤點</title>
     <style>
         * {
             box-sizing: border-box;
@@ -352,7 +352,7 @@
 <body>
 
     <div class="header">
-        <h1>水表倉庫儲位查詢與盤點系統</h1>
+        <h1>水表倉庫存放位置與盤點</h1>
     </div>
 
     <div class="container">
@@ -364,7 +364,7 @@
         <!-- 模式切換 -->
         <div class="mode-tabs">
             <div class="mode-tab active" onclick="switchMode('search')">🔍 表號查詢</div>
-            <div class="mode-tab" onclick="switchMode('inventory')">📋 儲位與口徑盤點</div>
+            <div class="mode-tab" onclick="switchMode('inventory')">📋 儲存位置與口徑盤點</div>
         </div>
 
         <!-- 模式一：表號查詢 -->
@@ -422,7 +422,7 @@
                 <div class="card-title">請選擇盤點條件：</div>
                 <div style="display: flex; gap: 6px; width: 100%;">
                     <select id="locSelect" onchange="filterInventory()" style="flex: 1;">
-                        <option value="">-- 全部儲位 --</option>
+                        <option value="">-- 全部位置 --</option>
                     </select>
                     <select id="sizeSelect" onchange="filterInventory()" style="flex: 1;">
                         <option value="">-- 全部口徑 --</option>
@@ -484,7 +484,7 @@
             const status = document.getElementById("loadStatus");
             if (window.warehouseDatabase && Array.isArray(window.warehouseDatabase)) {
                 mockDatabase = window.warehouseDatabase;
-                status.innerText = `✅ 離線資料庫載入成功 (共 ${mockDatabase.length} 顆水表)`;
+                status.innerText = `✅ 離線資料庫載入成功 (共 ${mockDatabase.length} 筆資料)`;
                 status.style.color = "#27ae60";
                 initFilters();
             } else {
@@ -497,7 +497,7 @@
             const locSelect = document.getElementById("locSelect");
             const sizeSelect = document.getElementById("sizeSelect");
 
-            locSelect.innerHTML = '<option value="">-- 全部儲位 --</option>';
+            locSelect.innerHTML = '<option value="">-- 全部位置 --</option>';
             sizeSelect.innerHTML = '<option value="">-- 全部口徑 --</option>';
 
             const locs = [...new Set(mockDatabase.map(item => item.loc))].filter(Boolean).sort();
@@ -558,7 +558,7 @@
                 matches.forEach(item => {
                     const li = document.createElement("li");
                     li.className = "suggest-item";
-                    li.innerHTML = `⚙️ <strong>${item.id}</strong> (儲位: ${item.loc} | ${item.size}mm)`;
+                    li.innerHTML = `⚙️ <strong>${item.id}</strong> (位置: ${item.loc} | ${item.size}mm)`;
                     li.onclick = () => selectItem(item);
                     suggestList.appendChild(li);
                 });
@@ -596,7 +596,7 @@
             listContainer.innerHTML = "";
 
             if (mockDatabase.length === 0) {
-                listContainer.innerHTML = `<div class="no-data">倉庫無任何水表資料。</div>`;
+                listContainer.innerHTML = `<div class="no-data">倉庫無任何資料。</div>`;
                 return;
             }
 
@@ -621,7 +621,7 @@
                     listContainer.appendChild(div);
                 });
             } else {
-                listContainer.innerHTML = `<div class="no-data">沒有符合篩選條件的水表。</div>`;
+                listContainer.innerHTML = `<div class="no-data">沒有符合篩選條件的資料。</div>`;
             }
         }
 
@@ -635,7 +635,7 @@
             totalSteps = validImages.length;
 
             if (currentActiveMode === 'search') {
-                document.getElementById("searchResLocHeader").innerText = "儲位: " + item.loc;
+                document.getElementById("searchResLocHeader").innerText = "位置: " + item.loc;
                 document.getElementById("searchResId").innerText = "⚙️ 表號: " + item.id;
                 document.getElementById("searchResSize").innerText = item.size + " mm";
                 document.getElementById("searchResNote").innerText = item.note || "無備註";
@@ -659,7 +659,7 @@
                 document.getElementById("searchResultCard").scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             } else {
-                document.getElementById("resLocHeader").innerText = "儲位: " + item.loc;
+                document.getElementById("resLocHeader").innerText = "位置: " + item.loc;
                 document.getElementById("resId").innerText = "⚙️ 表號: " + item.id;
                 document.getElementById("resSize").innerText = item.size + " mm";
                 document.getElementById("resNote").innerText = item.note || "無備註";
