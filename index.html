@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水表倉庫儲位查詢與盤點系統</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            background-color: #1f497d;
+            color: white;
+            text-align: center;
+            padding: 12px 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
+        }
+        .card-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #1f497d;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* ⚙️ 資料來源設定區 (預設隱藏) */
+        .config-toggle {
+            text-align: right;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+        .config-toggle span {
+            color: #1f497d;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .config-box {
+            background-color: #fef9e7;
+            border: 1px solid #f5b041;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .config-box p {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            color: #7e5109;
+            line-height: 1.4;
+        }
+
+        /* Tab Styles */
+        .mode-tabs {
+            display: flex;
+            background: #e4e7eb;
+            border-radius: 8px;
+            padding: 2px;
+            margin-bottom: 10px;
+        }
+        .mode-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .mode-tab.active {
+            background: white;
+            color: #1f497d;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 6px;
+        }
+        input[type="text"], select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            background-color: white;
+        }
+        select {
+            cursor: pointer;
+        }
+        .btn {
+            background-color: #1f497d;
+            color: white;
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-success {
+            background-color: #27ae60;
+        }
+        
+        /* Fuzzy Search List */
+        .suggest-list {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        .suggest-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .suggest-item:last-child {
+            border-bottom: none;
+        }
+        .suggest-item:hover, .suggest-item:active {
+            background-color: #f0f4f8;
+        }
+        
+        /* Result presentation */
+        .result-card {
+            display: none;
+        }
+        
+        /* Inventory List Table */
+        .inventory-list {
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+        }
+        .inventory-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .inventory-item:active {
+            background: #f1f5f9;
+        }
+        .inventory-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .inventory-id {
+            font-weight: bold;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .info-val {
+            color: #111;
+            font-weight: bold;
+        }
+        .highlight-loc {
+            background-color: #e2f0d9;
+            color: #385723;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+        
+        /* 💡 圖片視窗容器 */
+        .image-viewport-container {
+            position: relative;
+            margin-top: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .image-viewport {
+            width: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+        .image-stage {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+        .slide {
+            min-width: 100%;
+            width: 100%;
+        }
+        .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* 💡 融入照片中的極簡導覽箭頭 */
+        .overlay-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-left { left: 8px; }
+        .nav-right { right: 8px; }
+        
+        .no-data {
+            text-align: center;
+            color: #94a3b8;
+            padding: 20px 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>水表倉庫儲位查詢與盤點系統</h1>
+    </div>
+
+    <div class="container">
+        <!-- 展開/收合設定按鈕 -->
+        <div class="config-toggle">
+            <span onclick="toggleConfig()">⚙️ 進階設定 (Google Sheets 網址)</span>
+        </div>
+
+        <!-- ⚙️ 雲端資料對接設定區 (預設收合) -->
+        <div id="configBox" class="config-box">
+            <div class="card-title" style="color: #7e5109; margin-bottom: 4px;">🔗 Google 試算表 CSV 網址：</div>
+            <div class="input-group">
+                <input type="text" id="csvUrlInput" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSGZ9t5UjSDIS2WcJDPU820zPj5vUfi3VvuCpoBwHesBa8NfoOeePneLlm7rxZvJxJMVxAEaFqObsC6/pub?output=csv" placeholder="請貼上 CSV 連結...">
+                <button class="btn btn-success" onclick="loadGoogleSheetData()">重新載入</button>
+            </div>
+        </div>
+
+        <!-- 狀態提示 -->
+        <div id="loadStatus" style="font-size: 12px; margin-bottom: 10px; text-align: center; color: #d35400; font-weight: bold;">
+            ⏳ 正在從雲端下載最新水表資料...
+        </div>
+
+        <!-- 模式切換 -->
+        <div class="mode-tabs">
+            <div class="mode-tab active" onclick="switchMode('search')">🔍 表號查詢</div>
+            <div class="mode-tab" onclick="switchMode('inventory')">📋 儲位與口徑盤點</div>
+        </div>
+
+        <!-- 模式一：表號查詢 -->
+        <div id="searchSection" class="card">
+            <div class="card-title">表號模糊搜尋：</div>
+            <div class="input-group">
+                <input type="text" id="searchInput" placeholder="輸入表號關鍵字..." oninput="handleFuzzySearch()">
+            </div>
+            <ul id="suggestList" class="suggest-list"></ul>
+        </div>
+
+        <!-- 模式二：盤點選項 -->
+        <div id="inventorySection" class="card" style="display: none;">
+            <div class="card-title">請選擇盤點條件：</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 13px; min-width: 70px; color: #555;">儲位區域:</span>
+                    <select id="locSelect" onchange="filterInventory()">
+                        <option value="">-- 全部儲位 --</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 13px; min-width: 70px; color: #555;">口徑規格:</span>
+                    <select id="sizeSelect" onchange="filterInventory()">
+                        <option value="">-- 全部口徑 --</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="inventory-list" id="inventoryList">
+                <div class="no-data">請先載入雲端資料。</div>
+            </div>
+        </div>
+
+        <!-- 💡 統一結果展示與相片導引卡片 -->
+        <div id="resultCard" class="card result-card">
+            <div class="card-title">📍 儲位與定位導引</div>
+            <div class="info-row">
+                <span class="info-label">水表表號</span>
+                <span class="info-val" id="resId">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">口徑 (mm)</span>
+                <span class="info-val" id="resSize">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">區域編號 (儲位)</span>
+                <span class="info-val highlight-loc" id="resLoc">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">備註說明</span>
+                <span class="info-val" id="resNote" style="color: #c00000;">-</span>
+            </div>
+
+            <!-- 照片輪播導航 (動態生成) -->
+            <div class="image-viewport-container">
+                <button class="overlay-nav nav-left" id="btnPrev" onclick="moveStep(-1)">❮</button>
+                <button class="overlay-nav nav-right" id="btnNext" onclick="moveStep(1)">❯</button>
+
+                <div class="image-viewport">
+                    <div class="image-stage" id="imageStage">
+                        <!-- 由 JS 動態生成幻燈片，跳過空缺照片 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mockDatabase = [];
+        let currentStep = 0;
+        let totalSteps = 0;
+
+        // 🌟 網頁載入時，自動執行載入雲端試算表資料
+        window.onload = function() {
+            loadGoogleSheetData();
+        };
+
+        function toggleConfig() {
+            const box = document.getElementById("configBox");
+            box.style.display = box.style.display === "block" ? "none" : "block";
+        }
+
+        // ⚡️ 動態讀取 Google Sheets 實作
+        function loadGoogleSheetData() {
+            const url = document.getElementById("csvUrlInput").value.trim();
+            const status = document.getElementById("loadStatus");
+            
+            status.innerText = "⏳ 正在同步自來水雲端資料庫...";
+            status.style.color = "#d35400";
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error("網路連線錯誤。");
+                    return response.text();
+                })
+                .then(csvText => {
+                    parseCSVToDatabase(csvText);
+                    status.innerText = `✅ 已同步最新資料 (共 ${mockDatabase.length} 顆水表)`;
+                    status.style.color = "#27ae60";
+                    initFilters();
+                })
+                .catch(err => {
+                    console.error(err);
+                    status.innerText = "❌ 資料庫同步失敗！請確認試算表已共用、發布為 CSV，且網址正確。";
+                    status.style.color = "#c0392b";
+                });
+        }
+
+        // CSV 解析程式碼
+        function parseCSVToDatabase(csvText) {
+            const lines = csvText.split(/\r?\n/);
+            if (lines.length < 2) return;
+
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            
+            const idxId = headers.indexOf("水表表號");
+            const idxSize = headers.indexOf("口徑");
+            const idxLoc = headers.indexOf("區域編號");
+            const idxFar = headers.indexOf("遠景照");
+            const idxNear = headers.indexOf("定位照");
+            const idxDetail = headers.indexOf("水表照"); 
+            const idxPointer = headers.indexOf("指針照");
+            const idxNote = headers.indexOf("備註");
+
+            const tempDb = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const row = parseCSVRow(lines[i]);
+                if (row.length < headers.length) continue;
+
+                const id = row[idxId] ? row[idxId].trim() : "";
+                if (!id) continue;
+
+                tempDb.push({
+                    id: id,
+                    size: row[idxSize] ? row[idxSize].trim() : "",
+                    loc: row[idxLoc] ? row[idxLoc].trim() : "",
+                    far_img: row[idxFar] ? row[idxFar].trim() : "",
+                    near_img: row[idxNear] ? row[idxNear].trim() : "",
+                    detail_img: idxDetail !== -1 && row[idxDetail] ? row[idxDetail].trim() : "",
+                    pointer_img: idxPointer !== -1 && row[idxPointer] ? row[idxPointer].trim() : "",
+                    note: row[idxNote] ? row[idxNote].trim() : ""
+                });
+            }
+
+            mockDatabase = tempDb;
+        }
+
+        // CSV 雙引號處理
+        function parseCSVRow(text) {
+            let p = '', r = [];
+            let q = false;
+            for (let i = 0; i < text.length; i++) {
+                let c = text.charAt(i);
+                if (c === '"') { q = !q; }
+                else if (c === ',' && !q) { r.push(p); p = ''; }
+                else { p += c; }
+            }
+            r.push(p);
+            return r.map(x => x.replace(/^"|"$/g, ''));
+        }
+
+        function initFilters() {
+            const locSelect = document.getElementById("locSelect");
+            const sizeSelect = document.getElementById("sizeSelect");
+
+            locSelect.innerHTML = '<option value="">-- 全部儲位 --</option>';
+            sizeSelect.innerHTML = '<option value="">-- 全部口徑 --</option>';
+
+            const locs = [...new Set(mockDatabase.map(item => item.loc))].filter(Boolean).sort();
+            const sizes = [...new Set(mockDatabase.map(item => item.size))].filter(Boolean).sort((a,b)=>a-b);
+
+            locs.forEach(loc => {
+                const opt = document.createElement("option");
+                opt.value = loc;
+                opt.innerText = loc;
+                locSelect.appendChild(opt);
+            });
+
+            sizes.forEach(size => {
+                const opt = document.createElement("option");
+                opt.value = size;
+                opt.innerText = size + " mm";
+                sizeSelect.appendChild(opt);
+            });
+
+            filterInventory();
+        }
+
+        function switchMode(mode) {
+            document.querySelectorAll(".mode-tab").forEach(tab => tab.classList.remove("active"));
+            if (mode === 'search') {
+                document.querySelector(".mode-tab:nth-child(1)").classList.add("active");
+                document.getElementById("searchSection").style.display = "block";
+                document.getElementById("inventorySection").style.display = "none";
+            } else {
+                document.querySelector(".mode-tab:nth-child(2)").classList.add("active");
+                document.getElementById("searchSection").style.display = "none";
+                document.getElementById("inventorySection").style.display = "block";
+                filterInventory();
+            }
+        }
+
+        function handleFuzzySearch() {
+            const input = document.getElementById("searchInput").value.trim().toLowerCase();
+            const suggestList = document.getElementById("suggestList");
+            suggestList.innerHTML = "";
+
+            if (!input) {
+                suggestList.style.display = "none";
+                return;
+            }
+
+            const matches = mockDatabase.filter(item => item.id.toLowerCase().includes(input));
+
+            if (matches.length > 0) {
+                matches.forEach(item => {
+                    const li = document.createElement("li");
+                    li.className = "suggest-item";
+                    li.innerHTML = `⚙️ 表號: <strong>${item.id}</strong> (儲位: ${item.loc} | ${item.size}mm)`;
+                    li.onclick = () => selectItem(item);
+                    suggestList.appendChild(li);
+                });
+                suggestList.style.display = "block";
+            } else {
+                const li = document.createElement("li");
+                li.className = "suggest-item";
+                li.style.color = "#999";
+                li.style.cursor = "default";
+                li.innerText = "找不到符合的表號";
+                suggestList.appendChild(li);
+                suggestList.style.display = "block";
+            }
+        }
+
+        function selectItem(item) {
+            document.getElementById("searchInput").value = item.id;
+            document.getElementById("suggestList").style.display = "none";
+            displayResult(item);
+        }
+
+        function filterInventory() {
+            const selectedLoc = document.getElementById("locSelect").value;
+            const selectedSize = document.getElementById("sizeSelect").value;
+            const listContainer = document.getElementById("inventoryList");
+            listContainer.innerHTML = "";
+
+            if (mockDatabase.length === 0) {
+                listContainer.innerHTML = `<div class="no-data">請先載入雲端資料。</div>`;
+                return;
+            }
+
+            const filtered = mockDatabase.filter(item => {
+                const matchLoc = selectedLoc ? item.loc === selectedLoc : true;
+                const matchSize = selectedSize ? item.size === selectedSize : true;
+                return matchLoc && matchSize;
+            });
+
+            if (filtered.length > 0) {
+                filtered.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "inventory-item";
+                    div.innerHTML = `
+                        <div class="inventory-meta">
+                            <span>儲位: <strong style="color: #1f497d;">${item.loc}</strong></span>
+                            <span>口徑: ${item.size}mm</span>
+                        </div>
+                        <div class="inventory-id">⚙️ ${item.id}</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">備註: ${item.note}</div>
+                    `;
+                    div.onclick = () => displayResult(item);
+                    listContainer.appendChild(div);
+                });
+            } else {
+                listContainer.innerHTML = `<div class="no-data">沒有符合篩選條件的水表。</div>`;
+            }
+        }
+
+        function displayResult(item) {
+            document.getElementById("resId").innerText = item.id;
+            document.getElementById("resLoc").innerText = item.loc;
+            document.getElementById("resNote").innerText = item.note;
+            document.getElementById("resSize").innerText = item.size + " mm";
+
+            const stage = document.getElementById("imageStage");
+            stage.innerHTML = "";
+
+            // 動態排除空缺，連續重排
+            const validImages = [];
+            if (item.far_img) validImages.push({ src: item.far_img, alt: "遠景" });
+            if (item.near_img) validImages.push({ src: item.near_img, alt: "定位" });
+            if (item.detail_img) validImages.push({ src: item.detail_img, alt: "水表" });
+            if (item.pointer_img) validImages.push({ src: item.pointer_img, alt: "指針" });
+
+            totalSteps = validImages.length;
+
+            validImages.forEach(imgData => {
+                const slideDiv = document.createElement("div");
+                slideDiv.className = "slide";
+                
+                const imgNode = document.createElement("img");
+                imgNode.src = imgData.src;
+                imgNode.alt = imgData.alt;
+                
+                slideDiv.appendChild(imgNode);
+                stage.appendChild(slideDiv);
+            });
+
+            const resultCard = document.getElementById("resultCard");
+            resultCard.style.display = "block";
+            goToStep(0);
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goToStep(stepIndex) {
+            currentStep = stepIndex;
+            const stage = document.getElementById("imageStage");
+            const percentage = -stepIndex * 100;
+            stage.style.transform = `translateX(${percentage}%)`;
+
+            document.getElementById("btnPrev").style.display = stepIndex === 0 ? "none" : "flex";
+            document.getElementById("btnNext").style.display = stepIndex === (totalSteps - 1) ? "none" : "flex";
+        }
+
+        function moveStep(direction) {
+            let next = currentStep + direction;
+            if (next >= 0 && next < totalSteps) {
+                goToStep(next);
+            }
+        }
+    </script>
+</body>
+</html>
